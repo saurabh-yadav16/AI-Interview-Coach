@@ -37,6 +37,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
+  ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
 ];
 
 app.use(
@@ -115,6 +117,16 @@ app.post('/api/interview/answer', protect, (req, res, next) => {
 }, submitAnswer);
 app.get('/api/interview/history', protect, getInterviewHistory);
 app.get('/api/dashboard', protect, getAnalyticsOverview);
+
+// Root Welcome Endpoint
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '🚀 AI Interview Coach Backend API is Live & Running!',
+    healthCheck: '/api/health',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
