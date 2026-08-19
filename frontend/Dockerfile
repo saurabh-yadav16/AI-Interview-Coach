@@ -1,0 +1,18 @@
+# Stage 1: Build React App with Vite
+FROM node:20-alpine AS build-stage
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve static production bundle with Nginx
+FROM nginx:alpine AS production-stage
+
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

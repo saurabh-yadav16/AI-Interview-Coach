@@ -1,30 +1,33 @@
-# 🍿 SyncParty — Real-Time Synced YouTube Watch Platform
+# 🤖 AI Interview Coach — Smart AI-Powered Technical Mock Interview Platform
 
-**SyncParty** is a production-ready, full-stack MERN platform that allows multiple users to stream YouTube videos simultaneously in perfect, real-time synchronization. Complete with secure JWT sessions, MongoDB persistence, password-protected lobbies, and role-based action privileges, it provides a premium dark-mode glassmorphic streaming experience.
+**AI Interview Coach** is a production-ready, full-stack MERN platform that helps software engineers prepare for technical interviews through personalized AI interview questions, real-time rubric scoring, ATS resume analysis, performance analytics, and custom 7-day improvement plans.
 
 ---
 
 ## 🏗️ System Architecture
 
-SyncParty is built on a hybrid architecture combining a high-performance Express + Node.js REST API with a real-time bi-directional Socket.IO WebSocket Server, backed by a secure MongoDB persistence layer.
+AI Interview Coach is built on a high-performance architecture combining a responsive Vite + React frontend with a secure Express + Node.js REST API, an intelligent multi-metric AI Evaluation Engine, and a MongoDB persistence layer.
 
 ```text
 +-------------------------------------------------------------+
 |                       Vite + React.js                       |
-|                 (Custom Glassmorphic UI)                    |
+|               (ClearRound Emerald SaaS UI)                  |
 +------------------------------+------------------------------+
                                |
-            ┌──────────────────┴──────────────────┐
-            │                                     │
-      REST (JWT)                        Socket.IO (Handshake JWT)
-            │                                     │
-            v                                     v
-+───────────────────────+             +───────────────────────+
-|      Express.js       |             |       Socket.IO       |
-|    (REST Router)      |             |    (WS Controller)    |
-+───────────┬───────────+             +───────────┬───────────+
-            │                                     │
-            └──────────────────┬──────────────────┘
+                               | REST API (JWT Bearer Token)
+                               v
++─────────────────────────────────────────────────────────────+
+|                         Express.js                          |
+|                       (REST Router)                         |
++──────────────┬───────────────────────────────┬──────────────+
+               │                               │
+               v                               v
++─────────────────────────────+ +─────────────────────────────+
+|     AI Evaluation Engine    | |    Resume Parser Service    |
+| (5-Metric Rubric Evaluator) | |   (PDF/DOCX ATS Analyzer)   |
++──────────────┬──────────────+ +──────────────┬──────────────+
+               │                               │
+               └───────────────┬───────────────┘
                                │
                                v
                     +───────────────────+
@@ -35,98 +38,111 @@ SyncParty is built on a hybrid architecture combining a high-performance Express
 
 ---
 
-## ⚡ WebSocket Event Flow
+## ⚡ Data & AI Evaluation Flow
 
-When synchronized commands are sent, the backend validates credentials against the database before executing broadcasts to prevent playback loops:
+When a candidate submits an interview answer, the backend validates credentials and executes a 5-dimension rubric evaluation:
 
-1. **Client Dispatch**: User triggers an action (Play, Pause, Seek, Video Change).
-2. **WebSocket Gateway**: Socket.IO receives the event with the attached JWT token and room identifier.
-3. **Database & RBAC Gate**: The WS Controller verifies participant role privileges (`Host` / `Moderator`) against Mongoose session data.
-4. **State Update & Broadcast**: Upon validation, the room timeline/state updates in MongoDB, and the event is broadcasted to all active participants in the room except sender (`socket.to(roomCode).emit(...)`).
+1. **Client Submission**: Candidate submits text/voice answer for a specific question.
+2. **REST API Gateway**: Express verifies JWT authentication and validates session ownership.
+3. **AI Evaluation Engine**: Evaluates answer across 5 weighted metrics:
+   - **Correctness (30%)** — Core technical accuracy.
+   - **Technical Depth (25%)** — Implementation details and edge cases.
+   - **Completeness (20%)** — Addressing all parts of the question.
+   - **Relevance (15%)** — Staying on-topic.
+   - **Clarity (10%)** — Structure and communication.
+4. **State Persistence**: Question score, detailed feedback, and ideal answer are saved in MongoDB, and live analytics radar charts are updated on the frontend.
 
 ---
 
 ## 🗄️ Database Schemas (Mongoose)
 
 ### 1. User
-Stores registration details and password hashes:
-- `username` *(String, unique, index)* — Display name.
-- `email` *(String, unique, lowercase)* — Session identifier.
-- `password` *(String, hashed via bcrypt)* — Secure password.
-- `avatarUrl` *(String)* — Path/URI to avatar.
+Stores candidate registration details, target role preferences, and extracted skills:
+- `name` *(String, required)* — Candidate full name.
+- `email` *(String, unique, lowercase)* — Account login identifier.
+- `password` *(String, hashed via bcrypt, select: false)* — Secure password hash.
+- `targetRole` *(String)* — Preferred track (e.g. `'Java Developer'`, `'Full Stack Engineer'`).
+- `skills` *(Array of Strings)* — Extracted technical skills list.
 
-### 2. Room
-Stores synchronized state and access control criteria:
-- `code` *(String, unique, index)* — 6-character unique uppercase room identifier.
-- `hostId` *(ObjectId, ref to User)* — Current owner.
-- `videoId` *(String)* — Active YouTube ID.
-- `playState` *(String: `'PLAYING'` | `'PAUSED'`)* — Status of player.
-- `currentTime` *(Number)* — Playback timeline in seconds.
-- `lastUpdated` *(Date)* — Sync timestamp.
-- `isPasswordProtected` *(Boolean)* — Password gate toggle.
-- `password` *(String, hashed)* — Credentials for private parties.
+### 2. Resume
+Stores parsed ATS metrics and extracted resume content:
+- `userId` *(ObjectId, ref to User)* — Candidate account reference.
+- `fileName` *(String)* — Original PDF/DOCX file name.
+- `filePath` *(String)* — File system storage path.
+- `atsScore` *(Number)* — Multi-dimensional ATS match percentage (0–100%).
+- `extractedText` *(String)* — Parsed raw text content.
+- `skills` *(Array of Strings)* — Technical skills found.
+- `strengths` *(Array of Strings)* — Parsed resume strengths.
+- `weaknesses` *(Array of Strings)* — Identified keyword gaps.
+- `suggestions` *(Array of Strings)* — Actionable ATS improvement tips.
 
-### 3. Participant
-Associates connected socket sessions with rooms:
-- `roomId` *(ObjectId, ref to Room)* — Target watch party.
-- `userId` *(ObjectId, ref to User)* — User details.
-- `socketId` *(String)* — Active Socket connection ID.
-- `role` *(String: `'Host'` | `'Moderator'` | `'Participant'`)* — Permissions tier.
-- `isActive` *(Boolean)* — Connection health indicator.
-
-### 4. Message
-Persists chat dialogue:
-- `roomId` *(ObjectId, ref to Room)* — Party channel.
-- `userId` *(String)* — Sender's socket ID or `'system'`.
-- `username` *(String)* — Handle to display.
-- `role` *(String)* — Role at time of dispatch.
-- `message` *(String)* — Input content.
+### 3. Interview
+Stores active and completed mock interview sessions:
+- `userId` *(ObjectId, ref to User)* — Interview owner.
+- `resumeId` *(ObjectId, ref to Resume)* — Associated resume analysis.
+- `role` *(String)* — Target job role (e.g. `'React Frontend'`, `'Node.js Backend'`).
+- `company` *(String)* — Target company style (e.g. `'Google'`, `'Amazon'`).
+- `difficulty` *(String: `'Beginner'` | `'Medium'` | `'Advanced'`)* — Difficulty tier.
+- `status` *(String: `'in_progress'` | `'completed'`)* — Session status.
+- `questions` *(Array of Subdocuments)* — Generated questions, submitted user answers, category scores, feedback, and ideal answers.
+- `finalScore` *(Number)* — Overall average session score (0–10).
 
 ---
 
-## 🔒 Role-Based Access Control (RBAC) Validation
+## 🔒 Feature & Access Control Matrix
 
-We enforce strict validation gates directly in our database and WebSocket managers before broadcasting playback controls or roster shifts:
+We enforce strict authentication and ownership validation gates across all platform modules:
 
-| Permission | Host | Moderator | Participant |
+| Platform Feature | Guest | Candidate | Admin |
 |---|:---:|:---:|:---:|
-| **Play / Pause / Seek** | ✅ | ✅ | ❌ |
-| **Sync New Video** | ✅ | ✅ | ❌ |
-| **Manage Roles (Promote/Demote)** | ✅ | ❌ | ❌ |
-| **Kick Watchers** | ✅ | ❌ | ❌ |
-| **Transfer Host Status** | ✅ | ❌ | ❌ |
-| **Submit Live Chat & Reactions** | ✅ | ✅ | ✅ |
+| **Landing Page & Role Tracks** | ✅ | ✅ | ✅ |
+| **Account Registration & Login** | ✅ | ✅ | ✅ |
+| **Upload Resume & ATS Scoring** | ❌ | ✅ | ✅ |
+| **Generate AI Mock Questions** | ❌ | ✅ | ✅ |
+| **Submit Answer & AI Evaluation** | ❌ | ✅ | ✅ |
+| **View Analytics & Radar Charts** | ❌ | ✅ | ✅ |
+| **7-Day Personalized Improvement Plan** | ❌ | ✅ | ✅ |
+| **24/7 AI Tutor Assistant** | ❌ | ✅ | ✅ |
 
 ---
 
 ## 🚀 Setup & Execution Guide
 
 ### Prerequisites
-- **Node.js**: v18+ recommended
+- **Node.js**: v18+ recommended (v24 supported)
 - **npm**: v9+ recommended
 - **MongoDB**: Local instance running, or MongoDB Atlas connection string
 
 ### 1. Environment Configuration
-Create a `.env` file in the `server` directory (reference `.env.example` in this directory):
+Create a `.env` file in the `backend` directory (reference `.env.example`):
 ```env
-PORT=4000
-MONGODB_URI=mongodb://127.0.0.1:27017/watchparty
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/ai_interview_coach
 JWT_SECRET=yoursupersecurejwtsecretkey
+OPENAI_API_KEY=sk-proj-your_openai_api_key
 ```
 
-### 2. Automatic Dependency Assembly
-From the root monorepo directory, run the installer script:
+### 2. Dependency Installation
+Install dependencies for both backend and frontend:
 ```bash
-npm run install:all
+# Install backend dependencies
+cd backend && npm install
+
+# Install frontend dependencies
+cd ../frontend && npm install
 ```
 
-### 3. Launch Development Environments
-Start both the backend server and Vite frontend concurrently:
+### 3. Launch Development Servers
+Start backend API and Vite frontend concurrently:
 ```bash
-npm run dev
+# Terminal 1: Start Backend Server
+cd backend && node server.js
+
+# Terminal 2: Start Frontend Application
+cd frontend && npm run dev
 ```
 - **Frontend App**: `http://localhost:5173`
-- **Backend API & WebSockets**: `http://localhost:4000`
+- **Backend API**: `http://localhost:5000`
 
 ---
 
@@ -134,19 +150,27 @@ npm run dev
 
 ### Part A: Database Provisioning (MongoDB Atlas)
 1. Register a free account on [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
-2. Create a Shared Cluster and setup database user credentials.
-3. Whitelist access IP address `0.0.0.0/0` (all paths).
-4. Copy the connection string (e.g. `mongodb+srv://<user>:<password>@cluster.mongodb.net/watchparty`).
+2. Create an **M0 Free Tier** database cluster.
+3. Whitelist access IP address `0.0.0.0/0`.
+4. Copy the connection URI (e.g. `mongodb+srv://<user>:<password>@cluster.mongodb.net/ai_interview_coach`).
 
 ### Part B: Backend Hosting (Render or Railway)
 1. Connect your GitHub repository to Render/Railway.
 2. Set Environment Variables:
    - `NODE_ENV=production`
+   - `PORT=5000`
    - `MONGODB_URI=your_atlas_connection_string`
-   - `JWT_SECRET=your_long_secure_production_secret`
-3. Configure build & start settings:
-   - **Build Command**: `npm run build:frontend` *(Vite compiles static assets directly into the server monorepo structure)*
-   - **Start Command**: `npm start` *(Runs Node.js server starting `server/src/index.js`, serving the REST API, Socket.IO pipelines, and static assets concurrently)*
+   - `JWT_SECRET=your_production_secret`
+   - `OPENAI_API_KEY=your_llm_key`
+3. Configure settings:
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
 
-### Part C: Static Assets Integration
-By default, the server is configured to serve the compiled frontend production bundle (`frontend/dist`) statically. This means deploying the monorepo to Render or Railway will yield both a running backend and a fully functional frontend hosted on a single domain, removing CORS issues and optimizing socket connection speed!
+### Part C: Frontend Hosting (Vercel or Netlify)
+1. Import `frontend` directory in Vercel.
+2. Configure settings:
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Add Environment Variable:
+   - `VITE_API_BASE_URL=https://your-backend-api.onrender.com/api`

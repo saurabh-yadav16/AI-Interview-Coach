@@ -1,0 +1,178 @@
+{
+  "info": {
+    "name": "AI Interview Coach API Postman Collection",
+    "description": "Complete MERN Backend API Testing Collection including Authentication, Resumes, Mock Interviews, Analytics, 7-Day Improvement Plan, and AI Tutor.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register User (HTTP 201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alex Mercer\",\n  \"email\": \"alex.test@example.com\",\n  \"password\": \"Password123!\",\n  \"targetRole\": \"Full Stack Developer\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login User (HTTP 200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.test@example.com\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/login", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "login"] }
+          }
+        },
+        {
+          "name": "Get User Profile (HTTP 200 OK)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "url": { "raw": "http://localhost:5000/api/auth/me", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Forgot Password Request (HTTP 200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.test@example.com\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/forgot-password", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "forgot-password"] }
+          }
+        },
+        {
+          "name": "Update Profile (HTTP 200 OK - PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetRole\": \"Principal Cloud Architect\",\n  \"targetCompany\": \"Amazon\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/auth/profile", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "profile"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Resume Management",
+      "item": [
+        {
+          "name": "Upload Resume PDF (HTTP 201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{ "key": "resume", "type": "file", "src": "/path/to/resume.pdf" }]
+            },
+            "url": { "raw": "http://localhost:5000/api/resumes/upload", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "resumes", "upload"] }
+          }
+        },
+        {
+          "name": "Delete Resume (HTTP 200 OK - DELETE)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "url": { "raw": "http://localhost:5000/api/resumes/:id", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "resumes", ":id"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. AI Mock Interviews",
+      "item": [
+        {
+          "name": "Start Interview Session (HTTP 201 Created)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"Full Stack Developer\",\n  \"company\": \"Google\",\n  \"interviewType\": \"Technical\",\n  \"difficulty\": \"Hard\",\n  \"totalQuestionsCount\": 5\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/interviews/start", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "interviews", "start"] }
+          }
+        },
+        {
+          "name": "Submit Answer (HTTP 200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionIndex\": 0,\n  \"userAnswer\": \"JWT authentication uses a Bearer token in headers verified statelessly in Express middleware.\"\n}"
+            },
+            "url": { "raw": "http://localhost:5000/api/interviews/:id/answer", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "interviews", ":id", "answer"] }
+          }
+        },
+        {
+          "name": "Get Next Question (HTTP 200 OK)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt_token}}" }],
+            "url": { "raw": "http://localhost:5000/api/interviews/:id/next-question", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "interviews", ":id", "next-question"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Security & Status Code Verification",
+      "item": [
+        {
+          "name": "Missing Required Fields (HTTP 400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": { "raw": "http://localhost:5000/api/auth/register", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Invalid Token (HTTP 401 Unauthorized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer invalid_token_xyz" }],
+            "url": { "raw": "http://localhost:5000/api/auth/me", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Unauthorized User Session Access (HTTP 403 Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{other_user_token}}" }],
+            "url": { "raw": "http://localhost:5000/api/interviews/:primary_user_interview_id", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "interviews", ":primary_user_interview_id"] }
+          }
+        },
+        {
+          "name": "Non-Existing Route (HTTP 404 Not Found)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "http://localhost:5000/api/invalid_route_path_xyz", "protocol": "http", "host": ["localhost"], "port": "5000", "path": ["api", "invalid_route_path_xyz"] }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-slate-900 font-sans min-h-screen overflow-x-hidden;
+  }
+}
+
+/* ClearRound Emerald & Mint SaaS Theme */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 20px 40px -15px rgba(4, 120, 87, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.glass-card {
+  background: rgba(240, 253, 244, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(187, 247, 208, 0.7);
+}
+
+.emerald-button {
+  @apply bg-[#047857] hover:bg-[#065f46] text-white font-bold rounded-full px-6 py-3.5 shadow-md shadow-emerald-700/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2;
+}
+
+.emerald-outline-button {
+  @apply bg-white hover:bg-emerald-50 text-slate-800 font-bold rounded-full px-6 py-3.5 border border-slate-300 hover:border-emerald-500 shadow-sm transition-all flex items-center justify-center gap-2;
+}
+
+.mint-pill {
+  @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-extrabold uppercase tracking-wider;
+}
+
+.gradient-text-emerald {
+  @apply font-serif italic text-emerald-700 font-bold;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f0fdf4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a7f3d0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}
